@@ -12,7 +12,7 @@ env/
 .ipynb_checkpoints/
 
 # PyTorch checkpoints and model files
-*.pth
+# *.pth
 *.pt
 
 # Logs
