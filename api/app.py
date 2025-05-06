@@ -15,7 +15,7 @@ import sys
 
 # Setup logging
 logging.basicConfig(
-    filename="app_debug.log",
+    # filename="app_debug.log",
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
