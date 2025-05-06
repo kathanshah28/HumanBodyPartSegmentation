@@ -1,0 +1,15 @@
+# Flask==3.0.3
+# Werkzeug==3.1.3
+# python-dotenv==1.1.0
+# langchain-core==0.3.55  # Adjust version based on your installed version
+# langchain-google-genai==2.1.3  # Adjust version based on your installed version
+# gunicorn # For production deployment
+
+Flask==3.0.3
+torch==2.7.0            # Adjust if you're using a different version
+numpy==1.26.4
+Pillow==10.4.0
+matplotlib==3.8.2
+Werkzeug==3.1.3
+gunicorn # For production deployment
+# logging==0.5.1
