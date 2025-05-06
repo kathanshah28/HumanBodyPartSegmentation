@@ -11,12 +11,16 @@ from PIL import Image
 import logging
 import traceback
 import requests
+import sys
 
 # Setup logging
 logging.basicConfig(
     filename="app_debug.log",
     level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # <== This sends logs to stdout
+    ]
 )
 
 
