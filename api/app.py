@@ -34,7 +34,7 @@ checkpoints_dir = "checkpoints_new_arctitecture_512512_adam"
 
 
 model = MultiUNet(n_classes=24, input_channels=1)
-checkpoint = torch.load(os.path.join(checkpoints_dir,"model_epoch_13.pth"))
+checkpoint = torch.load(os.path.join(checkpoints_dir,"model_epoch_13.pth"),map_location='cpu')
 model.load_state_dict(checkpoint['model_state_dict'])
 # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 # start_epoch = checkpoint['epoch'] + 1  # Resume from next epoch
