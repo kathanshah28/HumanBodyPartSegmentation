@@ -20,8 +20,6 @@ logging.basicConfig(
 )
 
 
-
-
 # model = MultiUNet(n_classes=24, input_channels=1)
 # checkpoint = torch.load(os.path.join(checkpoints_dir,"model_epoch_13.pth"),map_location='cpu')
 # model.load_state_dict(checkpoint['model_state_dict'])
@@ -33,17 +31,22 @@ logging.basicConfig(
 
 # Initialize Flask app
 
-BASE_DIR = os.getcwd()
+# BASE_DIR = os.getcwd()
 
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-PREDICTIONS_FOLDER = os.path.join(BASE_DIR, 'predictions')
-CHECKPOINTS_DIR = os.path.join(BASE_DIR, 'checkpoints')
+UPLOAD_FOLDER = '/tmp/uploads'
+PREDICTIONS_FOLDER = '/tmp/predictions'
+CHECKPOINTS_DIR = '/tmp/checkpoints'
+
+# UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+# PREDICTIONS_FOLDER = os.path.join(BASE_DIR, 'predictions')
+# CHECKPOINTS_DIR = os.path.join(BASE_DIR, 'checkpoints')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PREDICTIONS_FOLDER, exist_ok=True)
 os.makedirs(CHECKPOINTS_DIR, exist_ok=True)
 
 
-app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
+# app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
+app = Flask(__name__, template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PREDICTIONS_FOLDER'] = PREDICTIONS_FOLDER
 
@@ -51,15 +54,31 @@ MODEL_URL = "https://huggingface.co/kathan2813/HumanBodySegmentationVitonDataset
 MODEL_PATH = os.path.join(CHECKPOINTS_DIR, "model_epoch_13.pth")
 
 if not os.path.exists(MODEL_PATH):
-    logging.info("Downloading model checkpoint...")
-    with open(MODEL_PATH, 'wb') as f:
-        f.write(requests.get(MODEL_URL).content)
-    logging.info("Model downloaded successfully.")
+    try:
+        logging.info("Downloading model checkpoint...")
+        response = requests.get(MODEL_URL, timeout=30)
+        response.raise_for_status()
+        with open(MODEL_PATH, 'wb') as f:
+            f.write(response.content)
+        logging.info("Model downloaded successfully.")
+    except Exception as e:
+        logging.error(f"Failed to download model: {e}")
+        raise RuntimeError("Model download failed.")
 
-model = MultiUNet(n_classes=24, input_channels=1)
-checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
-model.load_state_dict(checkpoint['model_state_dict'])
-model.eval()
+# model = MultiUNet(n_classes=24, input_channels=1)
+# checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+# model.load_state_dict(checkpoint['model_state_dict'])
+# model.eval()
+
+# Load model
+try:
+    model = MultiUNet(n_classes=24, input_channels=1)
+    checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+except Exception as e:
+    logging.error(f"Model loading error: {e}")
+    raise RuntimeError("Model loading failed.")
 
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
@@ -117,6 +136,11 @@ def view_prediction(filename):
 @app.route('/favicon.ico')
 def favicon():
     return '', 204  # No Content
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.error("Unhandled Exception: %s\n%s", str(e), traceback.format_exc())
+    return "Internal Server Error", 500
 
 
 if __name__ == "__main__":
