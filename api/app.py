@@ -35,7 +35,7 @@ logging.basicConfig(
 
 # Initialize Flask app
 
-# BASE_DIR = os.getcwd()
+BASE_DIR = os.getcwd()
 
 UPLOAD_FOLDER = '/tmp/uploads'
 PREDICTIONS_FOLDER = '/tmp/predictions'
@@ -49,8 +49,8 @@ os.makedirs(PREDICTIONS_FOLDER, exist_ok=True)
 os.makedirs(CHECKPOINTS_DIR, exist_ok=True)
 
 
-# app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
+# app = Flask(__name__, template_folder='templates')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PREDICTIONS_FOLDER'] = PREDICTIONS_FOLDER
 
