@@ -114,6 +114,10 @@ def view_prediction(filename):
     full_path = os.path.join(app.config['PREDICTIONS_FOLDER'], filename)
     return send_file(full_path, mimetype='image/png')
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204  # No Content
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
