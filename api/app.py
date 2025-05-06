@@ -9,6 +9,8 @@ import os
 import matplotlib.pyplot as plt
 from PIL import Image
 import logging
+import traceback
+import requests
 
 # Setup logging
 logging.basicConfig(
@@ -17,49 +19,47 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# # Load the model
-# model_path = "checkpoints_new_arctitecture_512512_adam/final_model.pth"
-# with open(model_path, "rb") as f:
-#     model_state_dict = pickle.load(f)
+
+
 
 # model = MultiUNet(n_classes=24, input_channels=1)
-# model.load_state_dict(model_state_dict)
+# checkpoint = torch.load(os.path.join(checkpoints_dir,"model_epoch_13.pth"),map_location='cpu')
+# model.load_state_dict(checkpoint['model_state_dict'])
+# # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+# # start_epoch = checkpoint['epoch'] + 1  # Resume from next epoch
+# # model.load_state_dict(model_state_dict)
 # model.eval()
-
-# # Load the model
-checkpoints_dir = "checkpoints_new_arctitecture_512512_adam"
-# with open(model_path, "rb") as f:
-#     model_state_dict = pickle.load(f)
-
-
-
-model = MultiUNet(n_classes=24, input_channels=1)
-checkpoint = torch.load(os.path.join(checkpoints_dir,"model_epoch_13.pth"),map_location='cpu')
-model.load_state_dict(checkpoint['model_state_dict'])
-# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-# start_epoch = checkpoint['epoch'] + 1  # Resume from next epoch
-# model.load_state_dict(model_state_dict)
-model.eval()
 
 
 # Initialize Flask app
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+BASE_DIR = os.getcwd()
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 PREDICTIONS_FOLDER = os.path.join(BASE_DIR, 'predictions')
+CHECKPOINTS_DIR = os.path.join(BASE_DIR, 'checkpoints')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(PREDICTIONS_FOLDER, exist_ok=True)
+os.makedirs(CHECKPOINTS_DIR, exist_ok=True)
+
 
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['PREDICTIONS_FOLDER'] = PREDICTIONS_FOLDER
 
-# app = Flask(__name__, template_folder='../templates')
-# UPLOAD_FOLDER = 'uploads'
-# PREDICTIONS_FOLDER = 'predictions'
-# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-# os.makedirs(PREDICTIONS_FOLDER, exist_ok=True)
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# app.config['PREDICTIONS_FOLDER'] = PREDICTIONS_FOLDER
+MODEL_URL = "https://huggingface.co/kathan2813/HumanBodySegmentationVitonDataset/resolve/main/model_epoch_13.pth"
+MODEL_PATH = os.path.join(CHECKPOINTS_DIR, "model_epoch_13.pth")
+
+if not os.path.exists(MODEL_PATH):
+    logging.info("Downloading model checkpoint...")
+    with open(MODEL_PATH, 'wb') as f:
+        f.write(requests.get(MODEL_URL).content)
+    logging.info("Model downloaded successfully.")
+
+model = MultiUNet(n_classes=24, input_channels=1)
+checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+model.load_state_dict(checkpoint['model_state_dict'])
+model.eval()
 
 @app.route("/", methods=["GET", "POST"])
 def upload_file():
