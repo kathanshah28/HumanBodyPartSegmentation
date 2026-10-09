@@ -89,15 +89,3 @@ The app will automatically download the model checkpoint from the configured Hug
 4. The Multi-UNet model predicts a segmentation map.
 5. The result is saved as an image and displayed in the browser.
 
-## Deployment
-
-This project includes a `Procfile` and `vercel.json`, which makes it suitable for deployment on hosting platforms that support Python apps and serverless/static deployments.
-
-## Notes
-
-- The app stores temporary uploaded files and predictions in `/tmp` directories by default.
-- The model checkpoint is downloaded at runtime, so an internet connection is required the first time the app runs.
-
-## License
-
-This repository does not appear to include an explicit license file. Please check with the repository owner before using it in production or for commercial purposes.
